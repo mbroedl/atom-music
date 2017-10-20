@@ -8,4 +8,4 @@
 # For more detailed documentation see
 # https://atom.io/docs/latest/behind-atom-keymaps-in-depth
 'atom-workspace':
-  'alt-m': 'atom-music:toggle'
+  'alt-m': 'atom-transcribe:toggle'

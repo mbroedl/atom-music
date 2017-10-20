@@ -1,22 +1,23 @@
 {
-  "name": "atom-music",
-  "main": "./lib/atom-music",
-  "version": "0.7.0",
-  "description": "A very simple Music player for atom, listen to your favorite music while workin in atom.",
+  "name": "atom-transcribe",
+  "main": "./lib/atom-transcribe",
+  "version": "0.0.1",
+  "description": "A very simple player for audiofiles for speech to text transcription. Based on sdinesh86's atom-music.",
   "keywords": [
-    "music",
+    "transcription",
+    "interview",
     "audio"
   ],
   "activationCommands": {
-    "atom-workspace": "atom-music:toggle"
+    "atom-workspace": "atom-transcribe:toggle"
   },
-  "repository": "https://github.com/sdinesh86/atom-music",
+  "repository": "https://github.com/mbroedl/atom-transcribe",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
-    "atom-space-pen-views": "^2.1.0",
-    "jquery": "^2.1.4"
+    "atom-space-pen-views": "^2.2.0",
+    "jquery": "^2.2.4"
   }
 }

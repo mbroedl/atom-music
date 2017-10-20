@@ -1,14 +1,14 @@
 {$, View} = require 'atom-space-pen-views'
 playListView = require './atom-music-playlist-view'
 module.exports =
-class AtomMusicView extends View
+class AtomTranscribeView extends View
   isPlaying: false
   playList: []
   playListCopy: []
   currentTrack: null
   shuffle: false
   @content: ->
-    @div class:'atom-music', =>
+    @div class:'atom-transcribe', =>
       @div class:'audio-controls-container', outlet:'container', =>
         @div class:'btn-group btn-group-sm', =>
           @button class:'btn icon icon-jump-left', click:'back15'
@@ -33,7 +33,7 @@ class AtomMusicView extends View
           @span 'Now Playing : ', class:'highlight'
           @span 'Nothing to play', class:'highlight', outlet:'nowPlayingTitle'
           @div id:'ticker',outlet:'ticker'
-      @div class:'atom-music-list-container'
+      @div class:'atom-transcribe-list-container'
       @tag 'audio', class:'audio-player', outlet:'audio_player', =>
 
   initialize: ->
