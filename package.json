@@ -19,5 +19,27 @@
   "dependencies": {
     "atom-space-pen-views": "^2.2.0",
     "jquery": "^2.2.4"
+  },
+  "configSchema": {
+    "smallSkip": {
+      "type": "integer",
+      "default": 2,
+      "min": 0,
+      "title": "Small skip.",
+      "description": "Duration of a small skip (backward or forward) in seconds. Milliseconds are possible to add."
+    },
+    "bigSkip": {
+      "type": "integer",
+      "default": 10,
+      "min": 0,
+      "title": "Big skip.",
+      "description": "Duration of a big skip (backward or forward) in seconds. Milliseconds are possible to add."
+    },
+    "pauseSkip": {
+      "type": "integer",
+      "default": 2,
+      "title": "Pause skip.",
+      "description": "Seconds to go backwards after each pause."
+    }
   }
 }

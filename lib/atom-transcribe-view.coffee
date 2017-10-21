@@ -3,9 +3,9 @@ module.exports =
 class AtomTranscribeView extends View
   thisTrack: null
   setPulsing: false
-  smallSkip: 2
-  bigSkip: 10
-  pauseSkip: 2
+  smallSkip: atom.config.get('atom-transcribe.smallSkip')
+  bigSkip: atom.config.get('atom-transcribe.bigSkip')
+  pauseSkip: atom.config.get('atom-transcribe.pauseSkip')
 
   @content: ->
     @div class:'atom-transcribe', =>
