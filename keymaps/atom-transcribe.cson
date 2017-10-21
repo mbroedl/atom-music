@@ -8,6 +8,6 @@
 # For more detailed documentation see
 # https://atom.io/docs/latest/behind-atom-keymaps-in-depth
 'atom-text-editor':
-  'ctrl-1': 'atom-transcribe:fastbackward'
+  'ctrl-1': 'atom-transcribe:fast-backward'
   'ctrl-2': 'atom-transcribe:backward'
-  'ctrl-space': 'atom-transcribe:togglePlayback'
+  'ctrl-space': 'atom-transcribe:toggle-playback'
