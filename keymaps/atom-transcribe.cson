@@ -7,5 +7,7 @@
 
 # For more detailed documentation see
 # https://atom.io/docs/latest/behind-atom-keymaps-in-depth
-'atom-workspace':
-  'alt-m': 'atom-transcribe:toggle'
+'atom-text-editor':
+  'ctrl-1': 'atom-transcribe:fastbackward'
+  'ctrl-2': 'atom-transcribe:backward'
+  'ctrl-space': 'atom-transcribe:togglePlayback'

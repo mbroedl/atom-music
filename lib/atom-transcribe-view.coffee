@@ -1,38 +1,30 @@
 {$, View} = require 'atom-space-pen-views'
-playListView = require './atom-music-playlist-view'
 module.exports =
 class AtomTranscribeView extends View
-  isPlaying: false
-  playList: []
-  playListCopy: []
-  currentTrack: null
-  shuffle: false
+  thisTrack: null
+  setPulsing: false
+  smallSkip: 2
+  bigSkip: 10
+  pauseSkip: 2
+
   @content: ->
     @div class:'atom-transcribe', =>
-      @div class:'audio-controls-container', outlet:'container', =>
+      @div class:'audio-controls-container', =>
+        @div class: 'block', id: 'progressblock', =>
+          @progress class: 'inline-block', max: '0', value='0', id: 'audio-progressbar', outlet: 'progressbar'
+          @span class: 'inline-block', id:'audio-ticker', outlet:'ticker'
         @div class:'btn-group btn-group-sm', =>
-          @button class:'btn icon icon-jump-left', click:'back15'
-          @button class:'btn icon icon-playback-rewind', click:'prevTrack'
+          @button class:'btn icon icon-playback-rewind skip_big', click:'fastbackward'
+          @button class:'btn icon icon-playback-rewind skip_small', click:'backward'
           @button class:'btn icon playback-button icon-playback-play', click:'togglePlayback'
-          @button class:'btn icon icon-playback-fast-forward', click:'nextTrack'
-          @button class:'btn icon icon-jump-right', click:'forward15'
+          @button class:'btn icon icon-playback-fast-forward skip_small', click:'forward'
+          @button class:'btn icon icon-playback-fast-forward skip_big', click:'fastforward'
         @div class:'btn-group btn-group-sm pull-right', =>
           @tag 'label', =>
-            @tag 'input', style:'display: none;', type:'button', click:'toggleShuffle'
-            @span 'Order', class:'btn shuffle-button icon icon-sync'
-          @tag 'label', =>
-            @tag 'input', style:'display: none;', type:'button', click:'showPlayList'
-            @span 'Show Playlist', class:'btn icon icon-list-ordered',
-          @tag 'label', =>
-            @tag 'input', style:'display: none;', type:'button', click:'clearPlayList'
-            @span 'Clear Playlist', class:'btn icon icon-trashcan',
-          @tag 'label', =>
-            @tag 'input', style:'display: none;', type:'file', multiple:true, accept:"audio/*", outlet:"musicFileSelectionInput"
-            @span 'Open Music Files', class:'btn icon icon-file-directory',
+            @tag 'input', style:'display: none;', type:'file', multiple: false, accept:"audio/*", outlet:"musicFileSelectionInput"
+            @span '', class:'btn icon icon-file-directory',
         @div class:'inline-block playing-now-container', =>
-          @span 'Now Playing : ', class:'highlight'
-          @span 'Nothing to play', class:'highlight', outlet:'nowPlayingTitle'
-          @div id:'ticker',outlet:'ticker'
+          @span 'No file selected.', class:'highlight', outlet:'nowPlayingTitle'
       @div class:'atom-transcribe-list-container'
       @tag 'audio', class:'audio-player', outlet:'audio_player', =>
 
@@ -44,12 +36,10 @@ class AtomTranscribeView extends View
     @audio_player.on 'pause', ( ) =>
       $('.playback-button').removeClass('icon-playback-pause').addClass('icon-playback-play')
     @audio_player.on 'ended', @songEnded
-    @container.on 'click', ( evt ) =>
-      if 35 <= evt.offsetY <= 40 and @currentTrack?
-        @ticker.context.style.width = evt.offsetX+"px"
-        totalTime = @audio_player[0].duration
-        factor = totalTime / @container.width()
-        @audio_player[0].currentTime = evt.offsetX * factor
+    @progressbar.on 'click', @jumpToTime
+    @progressbar.on 'mouseover', ( ) => $('#audio-progressbar').addClass('progresshover')
+    @progressbar.on 'mousemove', @hoverTime
+    @progressbar.on 'mouseout', ( ) => $('#audio-progressbar').removeClass('progresshover')
 
   show: ->
     @panel ?= atom.workspace.addBottomPanel(item:this)
@@ -61,129 +51,113 @@ class AtomTranscribeView extends View
     else
       @show()
       @pulsing()
+      @moveTicker()
+
+  makeTime: ( t ) =>
+    ms = (t % 1).toFixed(2).substring(2)
+    t = Math.floor(t)
+    s = String('00' + t % 60).slice(-2);
+    m = Math.floor(t / 60)
+    str = ""
+    if m > 60
+      h = String('00' + Math.floor(m / 60)).slice(-2)
+      m = String('00' + m % 60).slice(-2);
+      str = "#{h}:#{m}:#{s}.#{ms}"
+    else
+      m = String('00' + m).slice(-2);
+      str = "#{m}:#{s}.#{ms}"
+    return str
+
+  hoverTime: ( e ) =>
+    if @thisTrack?
+      totalTime = @audio_player[0].duration
+      newTime = totalTime * e.offsetX / parseInt(@progressbar.css('width'), 10)
+      @progressbar.attr 'value', newTime
+      @ticker.text(@makeTime(newTime) + ' / ' + @makeTime(totalTime))
+
+  jumpToTime: ( e ) =>
+    if @thisTrack?
+      @audio_player[0].currentTime = @audio_player[0].duration * e.offsetX / parseInt @progressbar.css('width'), 10
 
   moveTicker: ->
-    if @currentTrack?
-      timeSpent = @audio_player[0].currentTime
-      totalTime = @audio_player[0].duration
-      percentCompleted = timeSpent / totalTime
-      @ticker.context.style.width = percentCompleted * @container.width() + 'px'
+    setInterval ( ) =>
+      if @thisTrack?
+        timeSpent = @audio_player[0].currentTime
+        totalTime = @audio_player[0].duration
+        if !@progressbar.hasClass('progresshover')
+          @progressbar.attr('max', totalTime)
+          @progressbar.attr('value', timeSpent)
+          @ticker.text(@makeTime(timeSpent) + ' / ' + @makeTime(totalTime))
+    , 200
 
   pulsing: ->
-    setInterval ( ) =>
-      $(@).addClass('pulse')
-      @moveTicker()
-      setTimeout ( ) =>
-        $(@).removeClass('pulse')
-      , 2000
-    , 4000
+    if @setPulsing
+      setInterval ( ) =>
+        $(@).addClass('pulse')
+        setTimeout ( ) =>
+          $(@).removeClass('pulse')
+        , 2000
+      , 4000
 
   songEnded: ( e ) =>
-    console.log "Changing track"
-    @nextTrack()
+    console.log "Finished."
 
   skip: ( seconds )->
     delta = @audio_player[0].currentTime + seconds
     if (delta < 0)
       @audio_player[0].currentTime = 0
     else if (delta > @audio_player[0].duration)
-      @nextTrack()
+      @stopTrack
     else
       @audio_player[0].currentTime += seconds
 
-  forward15: ->
-    @skip(15)
+  forward: ->
+    @skip @smallSkip
 
-  back15: ->
-    @skip(-15)
+  fastforward: ->
+    @skip @bigSkip
 
-  nextTrack: ->
-    player = @audio_player[0]
-    if @currentTrack?
-      currentTrackIndex = @playList.indexOf @currentTrack
-      if currentTrackIndex == (@playList.length - 1)
-        @shuffleList() if @shuffle
-        currentTrackIndex = 0
-      else
-        currentTrackIndex += 1
-      @playTrack currentTrackIndex
-    # player.pause()
+  backward: ->
+    @skip -1 * @smallSkip
 
-  prevTrack: ->
-    player = @audio_player[0]
-    if @currentTrack?
-      currentTrackIndex = @playList.indexOf @currentTrack
-      if currentTrackIndex == 0
-        currentTrackIndex = 0
-      else
-        currentTrackIndex -= 1
-      @playTrack currentTrackIndex
+  fastbackward: ->
+    @skip -1 * @bigSkip
 
-  playTrackByItem: (item) ->
-    @shuffleList() if @shuffle
-    @playTrack @playList.indexOf(item)
-
-  playTrack: ( trackNum ) ->
-    track = @playList[trackNum]
+  loadTrack: (track) ->
     player = @audio_player[0]
     if track?
-      @currentTrack = track
       @nowPlayingTitle.html (track.name)
+      @thisTrack = track
       player.pause()
       player.src = track.path
       player.load()
       player.play()
 
-  stopTrack: ( trackNum ) ->
-    track = @playList[trackNum]
+  stopTrack: ->
     player = @audio_player[0]
-    if track?
+    if @thisTrack?
       @togglePlayback() if not player.paused
-      @currentTrack = null
       @nowPlayingTitle.html ('Nothing to play')
       player.src = null
 
   filesBrowsed: ( e ) =>
     files = $(e.target)[0].files
-    if files? and files.length > 0
-      @playList = []
-      for f in files
-        @playList.push { name:f.name, path:f.path }
-      @playListCopy = @playList[...]
-
-      @playTrack 0
+    if files? and files.length == 1
+      track = { name: files[0].name, path: files[0].path }
+      @loadTrack track
+    else
+      @nowPlayingTitle.html ('Please select only one track.')
 
   togglePlayback: ->
     player = @audio_player[0]
-    if @currentTrack?
+    if @thisTrack?
       if player.paused or player.currentTime == 0
+        @skip(-1 * @pauseSkip)
         player.play()
         $('.playback-button').removeClass('icon-playback-play').addClass('icon-playback-pause')
       else
         player.pause()
         $('.playback-button').removeClass('icon-playback-pause').addClass('icon-playback-play')
-
-  shuffleList: ->
-    for i in [@playList.length..1]
-      j = Math.floor Math.random() * i
-      [@playList[i - 1], @playList[j]] = [@playList[j], @playList[i - 1]]
-
-  toggleShuffle: ->
-    @shuffle = !@shuffle
-    if @shuffle
-      $('.shuffle-button').text('Shuffle')
-      @shuffleList()
-    else
-      $('.shuffle-button').text('Order')
-      @playList = @playListCopy[...]
-
-  showPlayList: ->
-    new playListView @, @playListCopy
-
-  clearPlayList: ->
-    @stopTrack 0
-    @playList = []
-    @playListCopy = []
 
   hide: ->
     @panel?.hide()

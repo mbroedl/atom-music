@@ -4,7 +4,7 @@
 // for a full listing of what's available.
 @import "ui-variables";
 
-.atom-music {
+.atom-transcribe {
   height: auto;
   border: 1px solid #000;
   transition: border 2s linear;
@@ -18,31 +18,47 @@
     padding: 7px 10px;
     border-bottom: 1px solid #000;
 
+    #progressblock {
+        margin-top: -.5em;
+        margin-bottom: 1em;
+    }
+
+    #audio-progressbar {
+        width: 100%;
+        height: 2em;
+        margin-bottom: -2em;
+    }
+    #audio-progressbar.progresshover {
+    }
+    #audio-ticker {
+        pointer-events: none;
+        position: relative;
+        //top: -2em;
+        margin-left: 50%;
+    }
+
+    .skip_big {
+        color: mix(@text-color-highlight, #ff0000, 50%)
+    }
+    .skip_small {
+        color: mix(@text-color-highlight, #ffff00, 50%)
+    }
+
     .playing-now-container {
       padding: 5px 20px;
     }
-
   }
 
-  .atom-music-list-container {
+  .atom-transcribe-list-container {
     width: 100%;
     height: 100%;
   }
 }
 
-#atom_music_player {
+#atom_transcribe_player {
   width: 100%;
 
   .audio-player {
     display: none;
   }
-}
-
-#ticker {
-  width: 0px;
-  height: 2px;
-  background-color: black;
-  position: absolute;
-  top: 98%;
-  left: 0px;
 }
