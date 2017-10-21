@@ -2,7 +2,7 @@
   "name": "atom-transcribe",
   "main": "./lib/atom-transcribe",
   "version": "0.0.1",
-  "description": "A very simple player for audiofiles for speech to text transcription. Based on sdinesh86's atom-music.",
+  "description": "A simple tool to play audiofiles for manual speech to text transcription.",
   "keywords": [
     "transcription",
     "interview",

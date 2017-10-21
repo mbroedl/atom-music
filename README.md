@@ -1,8 +1,18 @@
-# atom-music package
+# atom-transcribe package
 
-A very Simple Music player for atom.
+A simple audio player for atom to aid text/interview transcription.
+Based on sdinesh86/atom-music.
 
-Just press Alt-M to get it up.
-Then load your audio files using Open Music files button on the right hand side AND VOILA there you go playign your favorite music while doing your coding.
+Features:
 
-Happy Coding
+* load audio files
+* jump to a position (via GUI)
+* rewind and fast forward in two different configurable steps (via GUI and keys)
+* pause and resume playback, and optionally rewind the track upon playback
+* adjust the speed of the playback
+* insert a timestamp
+
+Planned for future releases:
+
+* configure speakers and implement shortcuts to add names
+* write file name of audio into YAML metadata (for markdown)
