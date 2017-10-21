@@ -1,7 +1,7 @@
 {
   "name": "atom-transcribe",
   "main": "./lib/atom-transcribe",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A simple tool to play audiofiles for manual speech to text transcription.",
   "keywords": [
     "transcription",
@@ -46,6 +46,6 @@
       "default": "**[%t]**",
       "title": "Format of inserted time stamp.",
       "description": "%t is replaced with the respective time in mm:ss.ms"
-  }
+    }
   }
 }
