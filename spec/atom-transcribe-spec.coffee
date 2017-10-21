@@ -1,40 +1,40 @@
-AtomMusic = require '../lib/atom-music'
+AtomTranscribe = require '../lib/atom-transcribe'
 
 # Use the command `window:run-package-specs` (cmd-alt-ctrl-p) to run specs.
 #
 # To run a specific `it` or `describe` block add an `f` to the front (e.g. `fit`
 # or `fdescribe`). Remove the `f` to unfocus the block.
 
-describe "AtomMusic", ->
+describe "AtomTranscribe", ->
   [workspaceElement, activationPromise] = []
 
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
-    activationPromise = atom.packages.activatePackage('atom-music')
+    activationPromise = atom.packages.activatePackage('atom-transcribe')
 
-  describe "when the atom-music:toggle event is triggered", ->
+  describe "when the atom-transcribe:toggle event is triggered", ->
     it "hides and shows the modal panel", ->
       # Before the activation event the view is not on the DOM, and no panel
       # has been created
-      expect(workspaceElement.querySelector('.atom-music')).not.toExist()
+      expect(workspaceElement.querySelector('.atom-transcribe')).not.toExist()
 
       # This is an activation event, triggering it will cause the package to be
       # activated.
-      atom.commands.dispatch workspaceElement, 'atom-music:toggle'
+      atom.commands.dispatch workspaceElement, 'atom-transcribe:toggle'
 
       waitsForPromise ->
         activationPromise
 
       runs ->
-        expect(workspaceElement.querySelector('.atom-music')).toExist()
+        expect(workspaceElement.querySelector('.atom-transcribe')).toExist()
 
-        atomMusicElement = workspaceElement.querySelector('.atom-music')
-        expect(atomMusicElement).toExist()
+        atomTranscribeElement = workspaceElement.querySelector('.atom-transcribe')
+        expect(atomTranscribeElement).toExist()
 
-        atomMusicPanel = atom.workspace.panelForItem(atomMusicElement)
-        expect(atomMusicPanel.isVisible()).toBe true
+        atomTranscribePanel = atom.workspace.panelForItem(atomTranscribeElement)
+        expect(atomTranscribePanel.isVisible()).toBe true
         atom.commands.dispatch workspaceElement, 'atom-music:toggle'
-        expect(atomMusicPanel.isVisible()).toBe false
+        expect(atomTranscribePanel.isVisible()).toBe false
 
     it "hides and shows the view", ->
       # This test shows you an integration test testing at the view level.
@@ -45,18 +45,18 @@ describe "AtomMusic", ->
       # workspaceElement to the DOM are generally slower than those off DOM.
       jasmine.attachToDOM(workspaceElement)
 
-      expect(workspaceElement.querySelector('.atom-music')).not.toExist()
+      expect(workspaceElement.querySelector('.atom-transcribe')).not.toExist()
 
       # This is an activation event, triggering it causes the package to be
       # activated.
-      atom.commands.dispatch workspaceElement, 'atom-music:toggle'
+      atom.commands.dispatch workspaceElement, 'atom-transcribe:toggle'
 
       waitsForPromise ->
         activationPromise
 
       runs ->
         # Now we can test for view visibility
-        atomMusicElement = workspaceElement.querySelector('.atom-music')
+        atomTranscribeElement = workspaceElement.querySelector('.atom-transcribe')
         expect(atomMusicElement).toBeVisible()
-        atom.commands.dispatch workspaceElement, 'atom-music:toggle'
-        expect(atomMusicElement).not.toBeVisible()
+        atom.commands.dispatch workspaceElement, 'atom-transcribe:toggle'
+        expect(atomTranscribeElement).not.toBeVisible()

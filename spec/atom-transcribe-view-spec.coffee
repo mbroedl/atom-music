@@ -1,5 +1,5 @@
-AtomMusicView = require '../lib/atom-music-view'
+AtomTranscribeView = require '../lib/atom-transcribe-view'
 
-describe "AtomMusicView", ->
+describe "AtomTranscribeView", ->
   it "has one valid test", ->
     expect("life").toBe "easy"
