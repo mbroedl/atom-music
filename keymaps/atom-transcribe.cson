@@ -15,3 +15,4 @@
   'ctrl-5': 'atom-transcribe:forward'
   'ctrl-6': 'atom-transcribe:fast-forward'
   'ctrl-4': 'atom-transcribe:increase-playback-speed'
+  'ctrl-t': 'atom-transcribe:insert-timestamp'

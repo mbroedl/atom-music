@@ -7,6 +7,7 @@ class AtomTranscribeView extends View
   smallSkip: atom.config.get('atom-transcribe.smallSkip')
   bigSkip: atom.config.get('atom-transcribe.bigSkip')
   pauseSkip: atom.config.get('atom-transcribe.pauseSkip')
+  timeStampFormat: atom.config.get('atom-transcribe.timeStampFormat')
 
   @content: ->
     @div class:'atom-transcribe', =>
@@ -20,6 +21,7 @@ class AtomTranscribeView extends View
           @button class:'btn icon playback-button icon-playback-play', click:'togglePlayback'
           @button class:'btn icon icon-playback-fast-forward skip_small', click:'forward'
           @button class:'btn icon icon-playback-fast-forward skip_big', click:'fastforward'
+          @button class:'btn icon icon-watch', click:'insertTimestamp'
         @div class:'btn-group btn-group-sm pull-right', =>
           @tag 'label', =>
             @tag 'input', style:'display: none;', type:'file', multiple: false, accept:"audio/*", outlet:"musicFileSelectionInput"
@@ -184,6 +186,12 @@ class AtomTranscribeView extends View
       else
         player.pause()
         $('.playback-button').removeClass('icon-playback-pause').addClass('icon-playback-play')
+
+  insertTimestamp: ->
+    if @thisTrack? and editor = atom.workspace.getActiveTextEditor()
+      ts = @makeTime @audio_player[0].currentTime
+      txt = @timeStampFormat.replace('%t', ts)
+      editor.insertText(txt)
 
   hide: ->
     @panel?.hide()

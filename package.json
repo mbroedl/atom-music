@@ -25,21 +25,27 @@
       "type": "integer",
       "default": 2,
       "min": 0,
-      "title": "Small skip.",
+      "title": "Skip: small.",
       "description": "Duration of a small skip (backward or forward) in seconds. Milliseconds are possible to add."
     },
     "bigSkip": {
       "type": "integer",
       "default": 10,
       "min": 0,
-      "title": "Big skip.",
+      "title": "Skip: big.",
       "description": "Duration of a big skip (backward or forward) in seconds. Milliseconds are possible to add."
     },
     "pauseSkip": {
       "type": "integer",
       "default": 2,
-      "title": "Pause skip.",
+      "title": "Skip: after pause.",
       "description": "Seconds to go backwards after each pause."
-    }
+    },
+    "timeStampFormat": {
+      "type": "string",
+      "default": "**[%t]**",
+      "title": "Format of inserted time stamp.",
+      "description": "%t is replaced with the respective time in mm:ss.ms"
+  }
   }
 }
