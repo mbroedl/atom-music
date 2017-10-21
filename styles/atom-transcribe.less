@@ -28,13 +28,16 @@
         height: 2em;
         margin-bottom: -2em;
     }
-    #audio-progressbar.progresshover {
+    #audio-progressbar:not([value]) {
+        display: none;
     }
     #audio-ticker {
         pointer-events: none;
         position: relative;
         //top: -2em;
-        margin-left: 50%;
+        display: block;
+        width: 100%;
+        text-align: center;
     }
 
     .skip_big {

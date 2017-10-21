@@ -3,6 +3,7 @@ module.exports =
 class AtomTranscribeView extends View
   thisTrack: null
   setPulsing: false
+  hoveredTime: null
   smallSkip: atom.config.get('atom-transcribe.smallSkip')
   bigSkip: atom.config.get('atom-transcribe.bigSkip')
   pauseSkip: atom.config.get('atom-transcribe.pauseSkip')
@@ -41,9 +42,8 @@ class AtomTranscribeView extends View
       $('.playback-button').removeClass('icon-playback-pause').addClass('icon-playback-play')
     @audio_player.on 'ended', @songEnded
     @progressbar.on 'click', @jumpToTime
-    @progressbar.on 'mouseover', ( ) => $('#audio-progressbar').addClass('progresshover')
     @progressbar.on 'mousemove', @hoverTime
-    @progressbar.on 'mouseout', ( ) => $('#audio-progressbar').removeClass('progresshover')
+    @progressbar.on 'mouseout', ( ) => @hoveredTime = null
 
   show: ->
     @panel ?= atom.workspace.addBottomPanel(item:this)
@@ -74,10 +74,8 @@ class AtomTranscribeView extends View
 
   hoverTime: ( e ) =>
     if @thisTrack?
-      totalTime = @audio_player[0].duration
-      newTime = totalTime * e.offsetX / parseInt(@progressbar.css('width'), 10)
-      @progressbar.attr 'value', newTime
-      @ticker.text(@makeTime(newTime) + ' / ' + @makeTime(totalTime))
+      @hoveredTime = @audio_player[0].duration * e.offsetX / parseInt(@progressbar.css('width'), 10)
+      @progressbar.attr('value', @hoveredTime)
 
   jumpToTime: ( e ) =>
     if @thisTrack?
@@ -88,10 +86,14 @@ class AtomTranscribeView extends View
       if @thisTrack?
         timeSpent = @audio_player[0].currentTime
         totalTime = @audio_player[0].duration
-        if !@progressbar.hasClass('progresshover')
-          @progressbar.attr('max', totalTime)
-          @progressbar.attr('value', timeSpent)
+        @progressbar.attr('max', totalTime)
+        if @hoveredTime?
+          t = @hoveredTime
+          @ticker.html('<i>('+@makeTime(t)+')</i> ' + @makeTime(timeSpent) + ' / ' + @makeTime(totalTime))
+        else
+          t = timeSpent
           @ticker.text(@makeTime(timeSpent) + ' / ' + @makeTime(totalTime))
+        @progressbar.attr('value', t)
     , 200
 
   pulsing: ->
