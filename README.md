@@ -3,6 +3,8 @@
 A simple audio player for atom to aid text/interview transcription.
 Based on sdinesh86/atom-music.
 
+![A screenshot of the program.](screenshot.png)
+
 Features:
 
 * load audio files
