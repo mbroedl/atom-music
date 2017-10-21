@@ -25,12 +25,16 @@ class AtomTranscribeView extends View
             @span '', class:'btn icon icon-file-directory',
         @div class:'inline-block playing-now-container', =>
           @span 'No file selected.', class:'highlight', outlet:'nowPlayingTitle'
+        @div class:'inline-block pull-right', id:'playback-rate', =>
+          @span outlet: 'playbackRangeText', class: 'pull-right playback-text'
+          @input class: 'input-range', type: 'range', max: '1.6', min:'0.5', value:'1.0', step:'0.01', outlet: 'playbackRangeInput'
       @div class:'atom-transcribe-list-container'
       @tag 'audio', class:'audio-player', outlet:'audio_player', =>
 
   initialize: ->
     self = @
     @musicFileSelectionInput.on 'change', @filesBrowsed
+    @playbackRangeInput.on 'change', @playbackRateSlider
     @audio_player.on 'play', ( ) =>
       $('.playback-button').removeClass('icon-playback-play').addClass('icon-playback-pause')
     @audio_player.on 'pause', ( ) =>
@@ -123,11 +127,18 @@ class AtomTranscribeView extends View
   fastbackward: ->
     @skip -1 * @bigSkip
 
+  reduceSpeed: ->
+    @changePlaybackRate parseFloat(@playbackRangeInput.prop('value')) - 0.05
+
+  increaseSpeed: ->
+    @changePlaybackRate parseFloat(@playbackRangeInput.prop('value')) + 0.05
+
   loadTrack: (track) ->
     player = @audio_player[0]
     if track?
       @nowPlayingTitle.html (track.name)
       @thisTrack = track
+      @changePlaybackRate 1.0
       player.pause()
       player.src = track.path
       player.load()
@@ -139,6 +150,19 @@ class AtomTranscribeView extends View
       @togglePlayback() if not player.paused
       @nowPlayingTitle.html ('Nothing to play')
       player.src = null
+
+  playbackRateSlider: ( e ) =>
+    @changePlaybackRate $(e.target)[0].value
+
+  changePlaybackRate: ( pbrate ) ->
+    if pbrate > @playbackRangeInput.prop('max')
+        pbrate = @playbackRangeInput.prop('max')
+    if pbrate < @playbackRangeInput.prop('min')
+        pbrate = @playbackRangeInput.prop('min')
+    pbrate = parseFloat pbrate
+    @audio_player[0].playbackRate = pbrate
+    @playbackRangeInput.prop('value', pbrate.toFixed(2))
+    @playbackRangeText.text('x'+pbrate.toFixed(2))
 
   filesBrowsed: ( e ) =>
     files = $(e.target)[0].files

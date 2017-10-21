@@ -21,6 +21,9 @@ module.exports = AtomTranscribe =
 
     atom.commands.add 'atom-text-editor', 'atom-transcribe:fast-forward': =>  @atomTranscribeView.fastforward()
 
+    atom.commands.add 'atom-text-editor', 'atom-transcribe:reduce-playback-speed': =>  @atomTranscribeView.reduceSpeed()
+    atom.commands.add 'atom-text-editor', 'atom-transcribe:increase-playback-speed': =>  @atomTranscribeView.increaseSpeed()
+
   deactivate: ->
     @atomTranscribeView.destroy()
 

@@ -10,6 +10,8 @@
 'atom-text-editor':
   'ctrl-1': 'atom-transcribe:fast-backward'
   'ctrl-2': 'atom-transcribe:backward'
+  'ctrl-3': 'atom-transcribe:reduce-playback-speed'
   'ctrl-space': 'atom-transcribe:toggle-playback'
   'ctrl-5': 'atom-transcribe:forward'
   'ctrl-6': 'atom-transcribe:fast-forward'
+  'ctrl-4': 'atom-transcribe:increase-playback-speed'
