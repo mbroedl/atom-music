@@ -59,7 +59,7 @@ class AtomTranscribeView extends View
       @pulsing()
       @moveTicker()
 
-  makeTime: ( t ) =>
+  makeTime: ( t ) ->
     ms = (t % 1).toFixed(2).substring(2)
     t = Math.floor(t)
     s = String('00' + t % 60).slice(-2);
@@ -73,6 +73,13 @@ class AtomTranscribeView extends View
       m = String('00' + m).slice(-2);
       str = "#{m}:#{s}.#{ms}"
     return str
+
+  makeTimestamp: ( t ) ->
+    tt = t.split(':').reverse()
+    flt = 0
+    for num, i in tt
+        flt += Math.pow(60,i) * parseFloat num
+    return flt
 
   hoverTime: ( e ) =>
     if @thisTrack?
