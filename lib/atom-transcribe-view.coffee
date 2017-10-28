@@ -1,9 +1,12 @@
 {$, View} = require 'atom-space-pen-views'
+
 module.exports =
 class AtomTranscribeView extends View
   thisTrack: null
+  markerLayer: null
   setPulsing: false
   hoveredTime: null
+  timestampRegexp: /(\d{1,2}:){1,2}\d{1,2}(\.\d{1,})?/
   smallSkip: atom.config.get('atom-transcribe.smallSkip')
   bigSkip: atom.config.get('atom-transcribe.bigSkip')
   pauseSkip: atom.config.get('atom-transcribe.pauseSkip')
@@ -43,9 +46,12 @@ class AtomTranscribeView extends View
     @audio_player.on 'pause', ( ) =>
       $('.playback-button').removeClass('icon-playback-pause').addClass('icon-playback-play')
     @audio_player.on 'ended', @songEnded
-    @progressbar.on 'click', @jumpToTime
+    @progressbar.on 'click', @jumpToTimeByProgress
     @progressbar.on 'mousemove', @hoverTime
     @progressbar.on 'mouseout', ( ) => @hoveredTime = null
+
+    view = atom.views.getView atom.workspace.getActiveTextEditor()
+    view.ondblclick = => @jumpToTimeByMarker()
 
   show: ->
     @panel ?= atom.workspace.addBottomPanel(item:this)
@@ -86,9 +92,20 @@ class AtomTranscribeView extends View
       @hoveredTime = @audio_player[0].duration * e.offsetX / parseInt(@progressbar.css('width'), 10)
       @progressbar.attr('value', @hoveredTime)
 
-  jumpToTime: ( e ) =>
+  jumpToTimeByProgress: ( e ) =>
     if @thisTrack?
       @audio_player[0].currentTime = @audio_player[0].duration * e.offsetX / parseInt @progressbar.css('width'), 10
+
+  jumpToTimeByMarker: (e) =>
+    editor = atom.workspace.getActiveTextEditor()
+    pos = editor.getCursorBufferPosition()
+    markers = @markerLayer.findMarkers {containsPoint: pos}
+
+    if markers[0]?
+      editor.setSelectedScreenRange [markers[0].getStartScreenPosition(), markers[0].getEndScreenPosition()]
+      ts = @makeTimestamp editor.getSelectedText()
+
+      @audio_player[0].currentTime = ts
 
   moveTicker: ->
     setInterval ( ) =>
@@ -115,7 +132,7 @@ class AtomTranscribeView extends View
       , 4000
 
   songEnded: ( e ) =>
-    console.log "Finished."
+    #console.log "Finished."
 
   skip: ( seconds )->
     delta = @audio_player[0].currentTime + seconds
@@ -154,6 +171,7 @@ class AtomTranscribeView extends View
       player.src = track.path
       player.load()
       player.play()
+      @markTimestamps()
 
   stopTrack: ->
     player = @audio_player[0]
@@ -199,6 +217,22 @@ class AtomTranscribeView extends View
       ts = @makeTime @audio_player[0].currentTime
       txt = @timeStampFormat.replace('%t', ts)
       editor.insertText(txt)
+      @markTimestamps()
+
+  markTimestamps: ->
+    if @markerLayer?
+      @markerLayer.destroy()
+    editor = atom.workspace.getActiveTextEditor()
+    @markerLayer = editor.addMarkerLayer()
+    range =  [[0, 0], editor.getEofBufferPosition()]
+    editor.scanInBufferRange new RegExp(@timestampRegexp, 'g'), range, (result) =>
+    #console.log result
+      m = @markerLayer.markBufferRange(result.range, {'invalidate':'inside'})
+
+    editor.decorateMarkerLayer @markerLayer, {
+      type: 'highlight',
+      class: 'atom-transcribe-timestamp'
+    }
 
   hide: ->
     @panel?.hide()

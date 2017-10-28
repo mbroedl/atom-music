@@ -4,6 +4,16 @@
 // for a full listing of what's available.
 @import "ui-variables";
 
+atom-text-editor .highlights .atom-transcribe-timestamp.region {
+    z-index: 1;
+    pointer-events: auto;
+    cursor: pointer;
+    background: none;
+    
+    border: solid .1em @text-color-warning;
+    border-radius: .4em;
+}
+
 .atom-transcribe {
   height: auto;
   border: 1px solid #000;
