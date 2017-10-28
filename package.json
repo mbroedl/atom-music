@@ -1,7 +1,7 @@
 {
   "name": "atom-transcribe",
   "main": "./lib/atom-transcribe",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A simple tool to play audiofiles for manual speech to text transcription.",
   "keywords": [
     "transcription",
