@@ -9,7 +9,7 @@ atom-text-editor .highlights .atom-transcribe-timestamp.region {
     pointer-events: auto;
     cursor: pointer;
     background: none;
-    
+
     border: solid .1em @text-color-warning;
     border-radius: .4em;
 }
@@ -38,16 +38,23 @@ atom-text-editor .highlights .atom-transcribe-timestamp.region {
         height: 2em;
         margin-bottom: -2em;
     }
-    #audio-progressbar:not([value]) {
+    #audio-progressbar:not([value]), #audio-progressbar:not([value]) + #audio-ticker-box {
         display: none;
     }
-    #audio-ticker {
+    #audio-ticker-box {
         pointer-events: none;
         position: relative;
-        //top: -2em;
+        top: .2em;
         display: block;
         width: 100%;
+        background-color: none;
         text-align: center;
+    }
+    #audio-ticker {
+        color: @text-color;
+        background-color: fade(@app-background-color, 60%);
+        padding: .4em;
+        margin: -.4em;
     }
 
     .skip_big {

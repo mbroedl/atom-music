@@ -17,7 +17,8 @@ class AtomTranscribeView extends View
       @div class:'audio-controls-container', =>
         @div class: 'block', id: 'progressblock', =>
           @progress class: 'inline-block', max: '0', value='0', id: 'audio-progressbar', outlet: 'progressbar'
-          @span class: 'inline-block', id:'audio-ticker', outlet:'ticker'
+          @div id: 'audio-ticker-box', =>
+            @span class: 'inline-block', id:'audio-ticker', outlet:'ticker'
         @div class:'btn-group btn-group-sm', =>
           @button class:'btn icon icon-playback-rewind skip_big', click:'fastbackward'
           @button class:'btn icon icon-playback-rewind skip_small', click:'backward'
@@ -59,6 +60,8 @@ class AtomTranscribeView extends View
 
   toggle:->
     if @panel?.isVisible()
+      if not @audio_player[0].paused
+        @togglePlayback()
       @hide()
     else
       @show()
