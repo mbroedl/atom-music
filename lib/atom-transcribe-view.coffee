@@ -102,13 +102,36 @@ class AtomTranscribeView extends View
   jumpToTimeByMarker: (e) =>
     editor = atom.workspace.getActiveTextEditor()
     pos = editor.getCursorBufferPosition()
-    markers = @markerLayer.findMarkers {containsPoint: pos}
+    matchbefore = false
+    matchafter = false
+    editor.scan  new RegExp(@timestampRegexp, 'g'), ( match ) =>
+      if match.range.start.isLessThanOrEqual(pos)
+        # include COLUMN
+        matchbefore = match
+      if match.range.end.isGreaterThanOrEqual(pos)
+        matchafter = match
+        match.stop()
 
-    if markers[0]?
-      editor.setSelectedScreenRange [markers[0].getStartScreenPosition(), markers[0].getEndScreenPosition()]
-      ts = @makeTimestamp editor.getSelectedText()
+    if not matchbefore or not matchafter
+      atom.notifications.addWarning 'Cannot move to the clicked section.',  {detail: 'The clicked section is before the first or after the last found timestamp; this makes interpolation impossible, sorry.', dismissible: true}
+      return
+    if matchbefore == matchafter
+      @audio_player[0].currentTime = @makeTimestamp matchbefore.matchText
+      return
 
-      @audio_player[0].currentTime = ts
+    prevtime = @makeTimestamp matchbefore.matchText
+    nexttime = @makeTimestamp matchafter.matchText
+
+    buffer = editor.getBuffer()
+    start = buffer.characterIndexForPosition matchbefore.range.end
+    end = buffer.characterIndexForPosition matchafter.range.start
+    offset = buffer.characterIndexForPosition pos
+
+    totaloffset = (offset - start) / (end - start)
+    ts = prevtime + totaloffset * (nexttime - prevtime)
+
+    @audio_player[0].currentTime = ts
+
 
   moveTicker: ->
     setInterval ( ) =>
