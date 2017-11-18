@@ -43,7 +43,7 @@
     },
     "timeStampFormat": {
       "type": "string",
-      "default": "**[%t]**",
+      "default": "_[%t]_",
       "title": "Format of inserted time stamp.",
       "description": "%t is replaced with the respective time in mm:ss.ms"
     }
