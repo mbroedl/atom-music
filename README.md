@@ -22,6 +22,9 @@ Originally based on sdinesh86/atom-music.
 |   9 |                    | open file             |                                                                                                     |
 |  10 |    (`dblclick`)    | jump to position      | jump to timestamp;  a double click in text interpolates the time between the surrounding timestamps | 
  
+Upon opening atom-transcribe, a fuzzy search guesses the audio file.
+Currently, ogg, mp3, and wav files in the current working folder are matched based on similarity of the opened file and the audio files.
+
 ## Possible future features?
 
 * configure speakers and implement shortcuts to add names
