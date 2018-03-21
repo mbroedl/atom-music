@@ -1,4 +1,7 @@
 {$, View} = require 'atom-space-pen-views'
+FuzzyMatching = require 'fuzzy-matching'
+path = require 'path'
+fs = require 'fs'
 
 module.exports =
 class AtomTranscribeView extends View
@@ -56,6 +59,7 @@ class AtomTranscribeView extends View
 
   show: ->
     @panel ?= atom.workspace.addBottomPanel(item:this)
+    @guessTrack()
     @panel.show()
 
   toggle:->
@@ -187,7 +191,24 @@ class AtomTranscribeView extends View
   increaseSpeed: ->
     @changePlaybackRate parseFloat(@playbackRangeInput.prop('value')) + 0.05
 
-  loadTrack: (track) ->
+  guessTrack: ->
+    player = @audio_player[0]
+    extensions = ['.mp3', '.ogg', '.wav']
+    if not player.src?
+      return
+    file = atom.workspace.getActiveTextEditor().buffer.file.path
+    folder = path.dirname file
+    filename = path.basename file
+    fs.readdir folder, (err, files) =>
+      files = files.filter (f) -> extensions.includes(path.extname(f))
+      fm = new FuzzyMatching(files)
+      res = fm.get(filename)
+      if res.distance > 0.7
+        guessedaudio = { name: res.value, path: path.join folder, res.value }
+        console.log 'Guessing audio', guessedaudio
+        @loadTrack(guessedaudio, true)
+
+  loadTrack: (track, dontplay) ->
     player = @audio_player[0]
     if track?
       @nowPlayingTitle.html (track.name)
@@ -196,7 +217,8 @@ class AtomTranscribeView extends View
       player.pause()
       player.src = track.path
       player.load()
-      player.play()
+      if dontplay? and not dontplay
+        player.play()
       @markTimestamps()
 
   stopTrack: ->
