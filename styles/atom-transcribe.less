@@ -75,16 +75,21 @@ atom-text-editor .highlights .atom-transcribe-timestamp.region {
     }
   }
 
-  .atom-transcribe-list-container {
-    width: 100%;
-    height: 100%;
+  .show-video {
+      display: none;
   }
-}
 
-#atom_transcribe_player {
-  width: 100%;
-
-  .audio-player {
-    display: none;
+  .player audio {
+      display: none;
+  }
+  .player video {
+      resize: both;
+      width: 300px;
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
+  }
+  .player video.hide {
+      display: none;
   }
 }

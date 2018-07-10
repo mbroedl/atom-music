@@ -17,6 +17,7 @@ class AtomTranscribeView extends View
 
   @content: ->
     @div class:'atom-transcribe', =>
+      @div class: 'player', outlet: 'playercontainer'
       @div class:'audio-controls-container', =>
         @div class: 'block', id: 'progressblock', =>
           @progress class: 'inline-block', max: '0', value='0', id: 'audio-progressbar', outlet: 'progressbar'
@@ -29,27 +30,26 @@ class AtomTranscribeView extends View
           @button class:'btn icon icon-playback-fast-forward skip_small', click:'forward'
           @button class:'btn icon icon-playback-fast-forward skip_big', click:'fastforward'
           @button class:'btn icon icon-watch', click:'insertTimestamp'
+          @span '', class:'btn icon icon-device-camera-video show-video', click: 'toggleVideo', outlet:"btnToggleVideo"
         @div class:'btn-group btn-group-sm pull-right', =>
           @tag 'label', =>
-            @tag 'input', style:'display: none;', type:'file', multiple: false, accept:"audio/*", outlet:"musicFileSelectionInput"
+            @tag 'input', style:'display: none;', type:'file', multiple: false, accept:"audio/*, video/*", outlet:"musicFileSelectionInput"
             @span '', class:'btn icon icon-file-directory',
         @div class:'inline-block playing-now-container', =>
           @span 'No file selected.', class:'highlight', outlet:'nowPlayingTitle'
         @div class:'inline-block pull-right', id:'playback-rate', =>
           @span outlet: 'playbackRangeText', class: 'pull-right playback-text'
           @input class: 'input-range', type: 'range', max: '1.6', min:'0.5', value:'1.0', step:'0.01', outlet: 'playbackRangeInput'
-      @div class:'atom-transcribe-list-container'
-      @tag 'audio', class:'audio-player', outlet:'audio_player', =>
 
   initialize: ->
     self = @
     @musicFileSelectionInput.on 'change', @filesBrowsed
     @playbackRangeInput.on 'change', @playbackRateSlider
-    @audio_player.on 'play', ( ) =>
+    @playercontainer.on 'play', 'audio, video', ( ) =>
       $('.playback-button').removeClass('icon-playback-play').addClass('icon-playback-pause')
-    @audio_player.on 'pause', ( ) =>
+    @playercontainer.on 'pause', 'audio, video', ( ) =>
       $('.playback-button').removeClass('icon-playback-pause').addClass('icon-playback-play')
-    @audio_player.on 'ended', @songEnded
+    @playercontainer.on 'ended', 'audio, video', @songEnded
     @progressbar.on 'click', @jumpToTimeByProgress
     @progressbar.on 'mousemove', @hoverTime
     @progressbar.on 'mouseout', ( ) => @hoveredTime = null
@@ -64,13 +64,17 @@ class AtomTranscribeView extends View
 
   toggle:->
     if @panel?.isVisible()
-      if not @audio_player[0].paused
+      if not @player?.paused
         @togglePlayback()
       @hide()
     else
       @show()
       @pulsing()
       @moveTicker()
+
+  toggleVideo: ->
+    $('.atom-transcribe video').toggleClass 'hide'
+    $('.atom-transcribe .btn.show-video').toggleClass 'text-subtle'
 
   makeTime: ( t ) ->
     ms = (t % 1).toFixed(2).substring(2)
@@ -96,12 +100,12 @@ class AtomTranscribeView extends View
 
   hoverTime: ( e ) =>
     if @thisTrack?
-      @hoveredTime = @audio_player[0].duration * e.offsetX / parseInt(@progressbar.css('width'), 10)
+      @hoveredTime = @player.duration * e.offsetX / parseInt(@progressbar.css('width'), 10)
       @progressbar.attr('value', @hoveredTime)
 
   jumpToTimeByProgress: ( e ) =>
     if @thisTrack?
-      @audio_player[0].currentTime = @audio_player[0].duration * e.offsetX / parseInt @progressbar.css('width'), 10
+      @player.currentTime = @player.duration * e.offsetX / parseInt @progressbar.css('width'), 10
 
   jumpToTimeByMarker: (e) =>
     editor = atom.workspace.getActiveTextEditor()
@@ -120,7 +124,7 @@ class AtomTranscribeView extends View
       atom.notifications.addWarning 'Cannot move to the clicked section.',  {detail: 'The clicked section is before the first or after the last found timestamp; this makes interpolation impossible, sorry.', dismissible: true}
       return
     if matchbefore == matchafter
-      @audio_player[0].currentTime = @makeTimestamp matchbefore.matchText
+      @player.currentTime = @makeTimestamp matchbefore.matchText
       return
 
     prevtime = @makeTimestamp matchbefore.matchText
@@ -134,14 +138,14 @@ class AtomTranscribeView extends View
     totaloffset = (offset - start) / (end - start)
     ts = prevtime + totaloffset * (nexttime - prevtime)
 
-    @audio_player[0].currentTime = ts
+    @player.currentTime = ts
 
 
   moveTicker: ->
     setInterval ( ) =>
       if @thisTrack?
-        timeSpent = @audio_player[0].currentTime
-        totalTime = @audio_player[0].duration
+        timeSpent = @player.currentTime
+        totalTime = @player.duration
         @progressbar.attr('max', totalTime)
         if @hoveredTime?
           t = @hoveredTime
@@ -165,13 +169,13 @@ class AtomTranscribeView extends View
     #console.log "Finished."
 
   skip: ( seconds )->
-    delta = @audio_player[0].currentTime + seconds
+    delta = @player.currentTime + seconds
     if (delta < 0)
-      @audio_player[0].currentTime = 0
-    else if (delta > @audio_player[0].duration)
+      @player.currentTime = 0
+    else if (delta > @player.duration)
       @stopTrack
     else
-      @audio_player[0].currentTime += seconds
+      @player.currentTime += seconds
 
   forward: ->
     @skip @smallSkip
@@ -192,9 +196,9 @@ class AtomTranscribeView extends View
     @changePlaybackRate parseFloat(@playbackRangeInput.prop('value')) + 0.05
 
   guessTrack: ->
-    player = @audio_player[0]
+    player = @player
     extensions = ['.mp3', '.ogg', '.wav']
-    if not player.src?
+    if not player or not player.src?
       return
     file = atom.workspace.getActiveTextEditor().buffer.file.path
     folder = path.dirname file
@@ -209,20 +213,26 @@ class AtomTranscribeView extends View
         @loadTrack(guessedaudio, true)
 
   loadTrack: (track, dontplay) ->
-    player = @audio_player[0]
+    type = track.type.replace /\/.*/ , ''
+    @player = document.createElement type
+    if type == 'video'
+        @btnToggleVideo.show()
+    else
+        @btnToggleVideo.hide()
+    @playercontainer[0].appendChild @player
     if track?
       @nowPlayingTitle.html (track.name)
       @thisTrack = track
       @changePlaybackRate 1.0
-      player.pause()
-      player.src = track.path
-      player.load()
+      @player.pause()
+      @player.src = track.path
+      @player.load()
       if dontplay? and not dontplay
-        player.play()
+        @player.play()
       @markTimestamps()
 
   stopTrack: ->
-    player = @audio_player[0]
+    player = @player
     if @thisTrack?
       @togglePlayback() if not player.paused
       @nowPlayingTitle.html ('Nothing to play')
@@ -237,20 +247,21 @@ class AtomTranscribeView extends View
     if pbrate < @playbackRangeInput.prop('min')
         pbrate = @playbackRangeInput.prop('min')
     pbrate = parseFloat pbrate
-    @audio_player[0].playbackRate = pbrate
+    @player.playbackRate = pbrate
     @playbackRangeInput.prop('value', pbrate.toFixed(2))
     @playbackRangeText.text('x'+pbrate.toFixed(2))
 
   filesBrowsed: ( e ) =>
     files = $(e.target)[0].files
-    if files? and files.length == 1
-      track = { name: files[0].name, path: files[0].path }
-      @loadTrack track
-    else
-      @nowPlayingTitle.html ('Please select only one track.')
+    if files?
+      if files.length == 1
+        track = { name: files[0].name, path: files[0].path, type: files[0].type }
+        @loadTrack track
+      else if files.length > 1
+        @nowPlayingTitle.html ('Please select only one track.')
 
   togglePlayback: ->
-    player = @audio_player[0]
+    player = @player
     if @thisTrack?
       if player.paused or player.currentTime == 0
         @skip(-1 * @pauseSkip)
@@ -262,7 +273,7 @@ class AtomTranscribeView extends View
 
   insertTimestamp: ->
     if @thisTrack? and editor = atom.workspace.getActiveTextEditor()
-      ts = @makeTime @audio_player[0].currentTime
+      ts = @makeTime @player.currentTime
       txt = @timeStampFormat.replace('%t', ts)
       editor.insertText(txt)
       @markTimestamps()
