@@ -196,20 +196,19 @@ class AtomTranscribeView extends View
     @changePlaybackRate parseFloat(@playbackRangeInput.prop('value')) + 0.05
 
   guessTrack: ->
-    player = @player
-    extensions = ['.mp3', '.ogg', '.wav']
-    if not player or not player.src?
-      return
+    audio_extensions = ['.mp3', '.ogg', '.wav']
+    video_extensions = ['.mp4', '.mkv']
     file = atom.workspace.getActiveTextEditor().buffer.file.path
     folder = path.dirname file
     filename = path.basename file
+
     fs.readdir folder, (err, files) =>
-      files = files.filter (f) -> extensions.includes(path.extname(f))
+      files = files.filter (f) -> audio_extensions.includes(path.extname(f)) or video_extensions.includes(path.extname(f))
       fm = new FuzzyMatching(files)
       res = fm.get(filename)
       if res.distance > 0.7
-        guessedaudio = { name: res.value, path: path.join folder, res.value }
-        console.log 'Guessing audio', guessedaudio
+        filetype = if audio_extensions.includes path.extname(res.value) then 'audio' else 'video'
+        guessedaudio = { name: res.value, path: path.join(folder, res.value), type: filetype, guessingscore: res.distance }
         @loadTrack(guessedaudio, true)
 
   loadTrack: (track, dontplay) ->
