@@ -1,6 +1,6 @@
 # atom-transcribe
 
-A simple audio player for atom to aid text/interview transcription.
+A simple audio and video player for atom to aid text transcription, interview transcription, or video transcription.
 Originally based on sdinesh86/atom-music.
 
 ![Screencast of the program.](screencast.gif)
@@ -24,6 +24,7 @@ Originally based on sdinesh86/atom-music.
  
 Upon opening atom-transcribe, a fuzzy search guesses the audio file.
 Currently, ogg, mp3, and wav files in the current working folder are matched based on similarity of the opened file and the audio files.
+Videos can also be loaded and played, while their visibility can be toggled.
 
 ## Possible future features?
 
