@@ -1,7 +1,7 @@
 {
   "name": "atom-transcribe",
   "main": "./lib/atom-transcribe",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A simple tool that helps to play and control audio and video files for manual speech to text transcription.",
   "keywords": [
     "transcription",
